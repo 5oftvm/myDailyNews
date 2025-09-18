@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>myDailyNews</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+    h1 { text-align: center; color: #2c3e50; }
+    .categories { text-align: center; margin-bottom: 20px; }
+    .categories button { margin: 0 5px; padding: 8px 15px; border: none; border-radius: 5px; background: #2980b9; color: white; cursor: pointer; }
+    .categories button:hover { background: #3498db; }
+    .article { background: white; padding: 15px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    a { color: #2980b9; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<h1>myDailyNews</h1>
+
+<div class="categories">
+    <button onclick="loadNews('general')">General</button>
+    <button onclick="loadNews('technology')">Technology</button>
+    <button onclick="loadNews('sports')">Sports</button>
+    <button onclick="loadNews('entertainment')">Entertainment</button>
+    <button onclick="loadNews('health')">Health</button>
+    <button onclick="loadNews('business')">Business</button>
+    <button onclick="loadNews('science')">Science</button>
+</div>
+
+<div id="news-container">Loading news...</div>
+
+<script>
+const apiKey = 'a2cbcb1f7c0a4bfaa675613edcd394e0';
+const newsContainer = document.getElementById('news-container');
+
+function loadNews(category='general') {
+    newsContainer.innerHTML = 'Loading news...';
+
+    // Use free CORS proxy to avoid browser CORS issues
+    const proxy = 'https://api.allorigins.win/get?url=';
+    const url = encodeURIComponent(`https://newsapi.org/v2/top-headlines?country=us&category=${category}&apiKey=${apiKey}`);
+
+    fetch(proxy + url)
+    .then(response => response.json())
+    .then(data => {
+        const newsData = JSON.parse(data.contents); // AllOrigins returns contents as string
+        newsContainer.innerHTML = '';
+        if (!newsData.articles || newsData.articles.length === 0) {
+            newsContainer.innerHTML = '<p>No news found.</p>';
+            return;
+        }
+
+        newsData.articles.forEach(article => {
+            const div = document.createElement('div');
+            div.className = 'article';
+            div.innerHTML = `
+                <h2>${article.title}</h2>
+                <p>${article.description || ''}</p>
+                <a href="${article.url}" target="_blank">Read More</a>
+            `;
+            newsContainer.appendChild(div);
+        });
+    })
+    .catch(err => {
+        newsContainer.innerHTML = '<p>Oops! Could not fetch news. Please try again later.</p>';
+        console.error(err);
+    });
+}
+
+// Load general news by default
+loadNews();
+</script>
+</body>
+</html>
+
